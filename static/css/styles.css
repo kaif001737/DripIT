@@ -1,0 +1,122 @@
+body {
+    margin: 0;
+    font-family: 'Cormorant Garamond', serif;
+    background: radial-gradient(700px 420px at 8% -15%, rgba(176,138,90,0.08), transparent 62%), radial-gradient(700px 420px at 92% 115%, rgba(176,138,90,0.05), transparent 62%), #0f0f10;
+    color: #f5f1e8;
+}
+
+/* Navbar */
+header {
+    background: #151516;
+    color: #f5f1e8;
+    padding: 15px 0;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    margin: auto;
+}
+
+.logo {
+    height: 50px;
+}
+
+nav a {
+    color: #f5f1e8;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #d8c7ac;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: transparent;
+}
+
+.hero h1 {
+    font-size: 60px;
+    letter-spacing: 5px;
+}
+
+.hero p {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+.btn {
+    padding: 12px 25px;
+    background: #a46b57;
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid #fff;
+}
+
+/* Features */
+.features {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px;
+}
+
+.card {
+    background: #f2e9dc;
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    border-radius: 10px;
+    color: #18161f;
+    border: 1px solid rgba(24, 22, 31, 0.12);
+}
+
+/* Models */
+.models {
+    text-align: center;
+    padding: 50px;
+}
+
+.grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.item img {
+    width: 250px;
+    border-radius: 10px;
+}
+
+.hero h1,
+.hero p,
+.features,
+.models,
+.about,
+.models h2,
+.about h2,
+.about p,
+.card h3,
+.card p {
+    color: #18161f;
+}
+
+/* About */
+.about {
+    padding: 50px;
+    text-align: center;
+}
+
+/* Footer */
+footer {
+    background: #151516;
+    color: #f5f1e8;
+    text-align: center;
+    padding: 20px;
+}

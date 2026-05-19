@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DripIt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --cream: #ff3b30;
+            --red: #ff3b30;
+            --muted: #b3b3b3;
+            --pastel-lavender: #ff3b30;
+            --pastel-mint: #ff3b30;
+            --pastel-peach: #ff3b30;
+            --pastel-sky: #ff3b30;
+            --font-display: 'Cormorant Garamond', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        html {
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: 14px;
+            cursor: none;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            background: var(--black);
+        }
+
+        a, button, input, textarea, select, label {
+            cursor: none;
+        }
+
+        body.is-loading {
+            overflow: hidden;
+        }
+
+        .site-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: grid;
+            place-items: center;
+            background: var(--black);
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .site-loader.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .site-loader img {
+            width: min(320px, 72vw);
+            max-height: 46vh;
+            object-fit: contain;
+            animation: loaderFade 3s ease-in-out both;
+        }
+
+        @keyframes loaderFade {
+            0% { opacity: 0; transform: scale(0.94); }
+            30% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.03); }
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.045;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .target-cursor {
+            position: fixed;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 10001;
+        }
+
+        .target-cursor {
+            width: 34px;
+            height: 34px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.55), 0 0 18px rgba(255, 59, 48, 0.22);
+            transition: width 0.15s ease, height 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+            animation: cursorBreath 1.8s ease-in-out infinite;
+        }
+
+        .target-cursor::before,
+        .target-cursor::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .target-cursor::before {
+            width: 14px;
+            height: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.88);
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.25);
+        }
+
+        .target-cursor::after {
+            width: 4px;
+            height: 4px;
+            background: #ff3b30;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.8);
+        }
+
+        .target-cursor.active {
+            width: 42px;
+            height: 42px;
+            border-color: #ff3b30;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 0 20px rgba(255, 59, 48, 0.3);
+            animation-duration: 1s;
+        }
+
+        .target-cursor.clicking {
+            width: 56px;
+            height: 56px;
+            border-color: #ff3b30;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45), 0 0 28px rgba(255, 59, 48, 0.45);
+            animation: cursorClickPulse 0.25s ease-out 1;
+        }
+
+        .target-cursor.hidden {
+            opacity: 0;
+        }
+
+        @keyframes cursorBreath {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.55), 0 0 18px rgba(255, 59, 48, 0.22);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.62), 0 0 24px rgba(255, 59, 48, 0.35);
+            }
+        }
+
+        @keyframes cursorClickPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.08);
+            }
+        }
+
+        /* ─── HEADER ─── */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            mix-blend-mode: normal;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.75rem;
+            height: 74px;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border-bottom: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+            border-radius: 2px;
+            filter: grayscale(20%);
+        }
+
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: var(--white);
+            text-transform: none;
+        }
+
+        .logo-text span {
+            color: var(--red);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        nav a {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            text-transform: none;
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.6rem 1.1rem;
+            position: relative;
+            transition: color 0.2s ease;
+            opacity: 0.9;
+        }
+
+        nav a::before {
+            content: attr(data-index);
+            position: absolute;
+            top: 0.3rem;
+            left: 0.6rem;
+            font-size: 0.55rem;
+            color: var(--pastel-mint);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--white);
+            opacity: 1;
+        }
+
+        nav a:hover::before {
+            opacity: 1;
+        }
+
+        nav a.active {
+            color: var(--white);
+            opacity: 1;
+        }
+
+        .nav-ticker {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-style: italic;
+            white-space: nowrap;
+        }
+
+        /* ─── MAIN ─── */
+        main {
+            flex: 1;
+            padding-top: 74px;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.14);
+            padding: 2.8rem 2.75rem;
+        }
+
+        .footer-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size: 1.08rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            text-transform: none;
+            color: var(--muted);
+        }
+
+        .footer-brand strong {
+            color: var(--white);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            text-transform: none;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.72);
+            letter-spacing: 0.06em;
+        }
+
+        /* ─── PAGE ENTER ANIMATION ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        main {
+            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.1s;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--black); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.22); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cream); }
+
+        /* ─── SELECTION ─── */
+        ::selection {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 640px) {
+            .nav-inner {
+                padding: 0 1rem;
+                height: auto;
+                min-height: 76px;
+                gap: 0.6rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            nav a {
+                font-size: 0.92rem;
+                padding: 0.45rem 0.65rem;
+            }
+            .nav-ticker {
+                display: block;
+                width: 100%;
+                text-align: center;
+                font-size: 0.62rem;
+                margin-bottom: 0.5rem;
+            }
+            main {
+                padding-top: 110px;
+            }
+            footer {
+                padding: 2.2rem 1.2rem;
+            }
+            .footer-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.2rem;
+            }
+            .footer-links {
+                gap: 1.2rem;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (hover: none), (pointer: coarse) {
+            html, a, button, input, textarea, select, label {
+                cursor: auto;
+            }
+            .target-cursor {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="site-loader" id="siteLoader" aria-hidden="true">
+    <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="DripIt loading logo">
+</div>
+<div class="target-cursor hidden" id="targetCursor" aria-hidden="true"></div>
+
+<header>
+    <div class="nav-inner">
+        <a href="/" class="logo-wrap">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" class="logo-img" alt="DripIt">
+            <span class="logo-text">DRIP<span>IT</span></span>
+        </a>
+
+        <nav>
+            <a href="/" data-index="01">Home</a>
+            <a href="/models" data-index="02">Collection</a>
+            <a href="/about" data-index="03">About</a>
+            <a href="/#contact" data-index="04">Contact</a>
+        </nav>
+
+        <span class="nav-ticker">SS '26 — NOW DROPPING</span>
+    </div>
+</header>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand"><strong>DripIt</strong> — Clothing</div>
+        <div class="footer-links">
+            <a href="/models">Collection</a>
+            <a href="/about">About</a>
+            <a href="https://www.instagram.com/dripit.studio?igsh=MXJhbDN5OXJyMXY2dQ==" target="_blank" rel="noopener noreferrer" aria-label="DripIt Instagram">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:middle;">
+                    <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm8.5 1.5h-8.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25Zm-4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5Zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Zm5.65-2.3a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/>
+                </svg>
+            </a>
+            <a href="/#contact">Contact</a>
+        </div>
+        <div class="footer-copy">© 2026 DripIt Clothing. All rights reserved.</div>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        const loader = document.getElementById('siteLoader');
+        const path = window.location.pathname;
+        const isHomePage = path === '/' || path === '/index' || path === '/index.html';
+
+        if (!isHomePage) {
+            loader.classList.add('hide');
+            return;
+        }
+
+        document.body.classList.add('is-loading');
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                loader.classList.add('hide');
+                document.body.classList.remove('is-loading');
+            }, 3000);
+        });
+    })();
+
+    (function () {
+        const cursor = document.getElementById('targetCursor');
+        if (!cursor) return;
+
+        let targetX = window.innerWidth / 2;
+        let targetY = window.innerHeight / 2;
+        let x = targetX;
+        let y = targetY;
+
+        const interactiveSelector = "a, button, input, textarea, select, label, [role='button']";
+
+        const render = function () {
+            x += (targetX - x) * 0.2;
+            y += (targetY - y) * 0.2;
+            cursor.style.left = x + "px";
+            cursor.style.top = y + "px";
+            requestAnimationFrame(render);
+        };
+        requestAnimationFrame(render);
+
+        document.addEventListener("mousemove", function (e) {
+            targetX = e.clientX;
+            targetY = e.clientY;
+            cursor.classList.remove("hidden");
+            const interactive = e.target.closest(interactiveSelector);
+            cursor.classList.toggle("active", Boolean(interactive));
+        });
+
+        document.addEventListener("mouseleave", function () {
+            cursor.classList.add("hidden");
+            cursor.classList.remove("clicking");
+        });
+
+        document.addEventListener("mousedown", function () {
+            cursor.classList.add("clicking");
+        });
+
+        document.addEventListener("mouseup", function () {
+            cursor.classList.remove("clicking");
+        });
+
+        window.addEventListener("blur", function () {
+            cursor.classList.remove("clicking");
+        });
+    })();
+</script>
+
+<!-- Elfsight WhatsApp Chat | Untitled WhatsApp Chat -->
+<script src="https://elfsightcdn.com/platform.js" async></script>
+<div class="elfsight-app-b410d3eb-0d29-4e77-a777-e8a692f27090" data-elfsight-app-lazy></div>
+
+</body>
+</html>

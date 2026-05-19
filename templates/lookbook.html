@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .lookbook-page {
+        min-height: calc(100vh - 64px);
+        padding: 5rem 2.5rem;
+        background: var(--black);
+        color: var(--white);
+    }
+
+    .lookbook-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: var(--black);
+    }
+
+    .lookbook-head {
+        padding: 2.25rem 2rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .lookbook-kicker {
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        letter-spacing: 0.03em;
+        text-transform: none;
+        color: var(--red);
+        margin-bottom: 0.7rem;
+    }
+
+    .lookbook-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 5vw, 4.2rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        text-transform: none;
+        line-height: 0.95;
+        color: var(--red);
+    }
+
+    .lookbook-subtitle {
+        margin-top: 0.9rem;
+        color: var(--muted);
+        max-width: 60ch;
+        line-height: 1.7;
+    }
+
+    .lookbook-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .lookbook-card {
+        background: #000000;
+        padding: 2rem 1.4rem;
+        min-height: 210px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .lookbook-card-num {
+        font-family: var(--font-display);
+        font-size: 2.6rem;
+        color: rgba(255,255,255,0.2);
+        line-height: 1;
+    }
+
+    .lookbook-card h3 {
+        font-family: var(--font-display);
+        text-transform: none;
+        letter-spacing: 0.01em;
+        color: var(--red);
+        font-size: 1.1rem;
+        margin: 1.2rem 0 0.7rem;
+    }
+
+    .lookbook-card p {
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.65;
+    }
+
+    .lookbook-actions {
+        padding: 1.4rem 2rem 2rem;
+        border-top: 1px solid rgba(255,255,255,0.18);
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .lookbook-btn {
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: 0.02em;
+        font-family: var(--font-body);
+        font-size: 0.88rem;
+        padding: 0.75rem 1.05rem;
+        border: 1px solid rgba(255,255,255,0.4);
+        color: var(--white);
+        transition: all 0.2s ease;
+    }
+
+    .lookbook-btn:hover {
+        background: rgba(255,255,255,0.08);
+    }
+
+    .lookbook-btn.primary {
+        background: var(--red);
+        border-color: var(--red);
+    }
+
+    .lookbook-btn.primary:hover {
+        background: #ff3b30;
+        border-color: #ff3b30;
+    }
+
+    @media (max-width: 900px) {
+        .lookbook-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .lookbook-page {
+            padding: 4.5rem 1.25rem;
+        }
+        .lookbook-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="lookbook-page">
+    <div class="lookbook-shell">
+        <div class="lookbook-head">
+            <div class="lookbook-kicker">DripIt / Lookbook</div>
+            <h1 class="lookbook-title">Spring / Summer 2026</h1>
+            <p class="lookbook-subtitle">
+                A curated set of signature silhouettes, elevated basics, and statement layers designed for everyday rotation.
+            </p>
+        </div>
+
+        <div class="lookbook-grid">
+            <article class="lookbook-card">
+                <div class="lookbook-card-num">01</div>
+                <div>
+                    <h3>Urban Core</h3>
+                    <p>Relaxed tailoring with structured outerwear for clean city-ready styling.</p>
+                </div>
+            </article>
+            <article class="lookbook-card">
+                <div class="lookbook-card-num">02</div>
+                <div>
+                    <h3>Monochrome Edit</h3>
+                    <p>Black-first layering with subtle textures for a premium understated look.</p>
+                </div>
+            </article>
+            <article class="lookbook-card">
+                <div class="lookbook-card-num">03</div>
+                <div>
+                    <h3>Weekend Form</h3>
+                    <p>Lightweight staples and modern cuts designed for comfort without compromise.</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="lookbook-actions">
+            <a href="/models" class="lookbook-btn primary">Shop Collection</a>
+            <a href="/about" class="lookbook-btn">About Brand</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
